@@ -11,4 +11,4 @@ The actor downloads the fresh daily data from the [pumpdroid.com](http://www.pum
 - [`utils.js`](./src/utils.js) Helper functions.
 
 ## Dataset
-The freshest gas prices are stored [here](https://api.apify.com/v2/datasets/l1n0myXdDIQbOMD0W/items?clean=true&format=html).
+The freshest gas prices are stored in the dataset [here](https://api.apify.com/v2/datasets/KLHGYP6iynI82JxhC/items?clean=true&format=html).
