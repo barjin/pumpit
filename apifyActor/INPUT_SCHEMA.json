@@ -1,0 +1,8 @@
+{
+  "title": "PumpIt",
+  "description": "Monitoring gas prices in Central Europe made simple.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {},
+  "required": []
+}
