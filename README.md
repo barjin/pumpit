@@ -7,7 +7,7 @@ Programming hobby project of a non-programmer trio.
 
 - [Figma App Design](https://www.figma.com/file/6xeujxSheNFT838xvrWOfJ/Untitled?)
 - [Data mining Apify actor](./apifyActor/)
-- Mobile Application (coming soon)
+- [Mobile Application](./PumpIt)
 
 ____
 
