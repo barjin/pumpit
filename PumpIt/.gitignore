@@ -1,5 +1,4 @@
-node_modules/*
-apify_storage/*# OSX
+# OSX
 #
 .DS_Store
 
