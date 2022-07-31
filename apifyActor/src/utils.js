@@ -1,9 +1,11 @@
+const fetch = require('node-fetch');
+
 /**
  * Converts angle size in degrees to radians.
  * @param {number} degrees Angle size in degrees
  * @returns Angle size in radians
  */
- function toRad(degrees) {
+function toRad(degrees) {
     return degrees * Math.PI / 180;
 }
 
@@ -29,6 +31,32 @@ function distance(lat1, lon1, lat2, lon2) {
     return d;
 }
 
-module.exports = {
-    distance
+function reverseGeocode(lat, lon) {
+    const url = new URL('https://api.mapy.cz/rgeocode');
+    url.searchParams.append('lon', lon);
+    url.searchParams.append('lat', lat);
+
+    return fetch(
+        url.toString(), {
+	        method: 'get',
+	        headers: {
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0',
+                Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,cs;q=0.7,en;q=0.3',
+                'Accept-Encoding': 'gzip, deflate, br',
+                Connection: 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'cross-site',
+            },
+        },
+    )
+    .then((x) => x.text())
+    .then((xml) => (xml.match(/label="([^"]+)"/) ?? [])[1]);
 }
+
+module.exports = {
+    distance,
+    reverseGeocode,
+};

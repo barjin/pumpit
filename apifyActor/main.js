@@ -1,5 +1,5 @@
 const Apify = require('apify');
-const { distance } = require('./src/utils');
+const { distance, reverseGeocode } = require('./src/utils');
 
 Apify.main(async () => {
     const requestList = await Apify.openRequestList(
@@ -17,7 +17,7 @@ Apify.main(async () => {
     await oldDataset.drop();
 
     /** A list collecting all the types of the gas stations. */
-    let gasStations = [];
+    const gasStations = [];
 
     const crawler = new Apify.CheerioCrawler({
         requestList,
@@ -46,9 +46,21 @@ Apify.main(async () => {
                         [`updated_${fuel}`]: updated,
                     };
                 } else {
+                    const supportedIcons = [
+                        'agip', 'ahold_albert', 'benzina', 'cepro', 'enioil', 'eurooil', 'globus', 'hunsgas',
+                        'km_prona', 'lukoil', 'makro', 'omv', 'papoil', 'robinoil', 'shell', 'caroil',
+                        'slovnaft', 'tankono', 'tesco', 'vena_trade', 'way24', 'csadjihotrans', 'tohozsro',
+                        'kiwi', 'etk', 'vpk', 'herst', 'mwd', 'autojarov', 'stopkalibeň', 'mol',
+                    ];
+
+                    const iconName = company.replace(' ', '').replace('-', '_').replace(/\./g, '').toLowerCase();
+
+                    const icon = supportedIcons.find((x) => x === iconName);
+
                     // If we haven't seen this gas station yet, we add it as a new one.
                     gasStations.push(
                         {
+                            icon,
                             company,
                             note,
                             lt,
@@ -73,10 +85,34 @@ Apify.main(async () => {
     // Now, we finally run it.
     await crawler.run();
 
+    let finished = 0;
+    let retries = 0;
+
+    const gasStationsWithAddresses = await Promise.all(
+        gasStations.map(async (station) => {
+            let address;
+            while (true) {
+                try {
+                    address = await reverseGeocode(station.lt, station.ln);
+                    if (address === '' || !address) throw new Error('empty address');
+                    console.log(`${finished++}/${gasStations.length}`);
+                    break;
+                } catch (e) {
+                    await new Promise((res) => setTimeout(res, 300));
+                    console.log(`${retries++}`);
+                }
+            }
+            return {
+                ...station,
+                address,
+            };
+        }),
+    );
+
     /** A new Apify dataset. */
     const dataset = await Apify.openDataset('benziny');
 
     // We add the gas station data to the dataset.
-    await dataset.pushData(gasStations);
+    await dataset.pushData(gasStationsWithAddresses);
     console.log('Crawl finished.');
 });
